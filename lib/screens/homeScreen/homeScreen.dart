@@ -71,39 +71,47 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             headerSection(),
             Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: data.length,
-                itemBuilder: (context, index) {
-                  final field = data[index];
-                  print(field.type);
-                  print(field.banners);
-                  switch (field.type) {
-                    case 'carousel':
-                      return BannerSection(
-                        items: field.carouselItems,
-                      );
-                    case 'brands':
-                      return BrandBanner(brands: field.brands!);
-                    case 'category':
-                      return CategoryAvathar(categoriesList: field.categories!);
-                    case 'rfq':
-                      return _buildRfqBanner(field.image!);
-                    case 'collection':
-                      return ProductList(
-                          title: field.name!, products: field.products!);
-                    case 'future-order':
-                      return _buildRfqBanner(field.image!);
-                    case 'banner-grid':
-                      return BannerGrid(banners: field.banners);
-                    case 'banner':
-                      return _buildRfqBanner(field.banner?.image);
-                    default:
-                      return const SizedBox.shrink();
+              child: Consumer<HomeProvider>(
+                builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (provider.error != null) {
+                    return Center(child: Text(provider.error!));
+                  } else {
+                    final data = provider.homeDataList;
+
+                    return ListView.builder(
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        final field = data[index];
+                        switch (field.type) {
+                          case 'carousel':
+                            return BannerSection(items: field.carouselItems!);
+                          case 'brands':
+                            return BrandBanner(brands: field.brands!);
+                          case 'category':
+                            return CategoryAvathar(
+                                categoriesList: field.categories!);
+                          case 'rfq':
+                            return _buildRfqBanner(field.image!);
+                          case 'collection':
+                            return ProductList(
+                                title: field.name!, products: field.products!);
+                          case 'future-order':
+                            return _buildRfqBanner(field.image!);
+                          case 'banner-grid':
+                            return BannerGrid(banners: field.banners);
+                          case 'banner':
+                            return _buildRfqBanner(field.banner?.image ?? '');
+                          default:
+                            return const SizedBox.shrink();
+                        }
+                      },
+                    );
                   }
                 },
               ),
-            )
+            ),
           ],
         ),
       ),
